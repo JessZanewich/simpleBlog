@@ -1,13 +1,15 @@
-var express         = require("express"),
-    app             = express(),
-    mongoose        = require("mongoose"),
-    bodyParser      = require("body-parser"),
-    methodOverride  = require("method-override");
+var express          = require("express"),
+    app              = express(),
+    mongoose         = require("mongoose"),
+    bodyParser       = require("body-parser"),
+    methodOverride   = require("method-override"),
+    expressSanitizer = require("express-sanitizer");
     
 mongoose.connect("mongodb://localhost/restful_blog");
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(expressSanitizer());
 app.use(methodOverride("_method"));
 
 //Schema Setup
@@ -19,18 +21,6 @@ var blogSchema = new mongoose.Schema({
 });
 
 var Blog = mongoose.model("Blog", blogSchema);
-
-/*Blog.create({
-   title: "First Post",
-   image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&s=61282cfeed75871385c84c2a44a8e594",
-   body:  "Look at the most beautiful mountains and the greatest space in Canada!"
-}, function(err, blog) {
-    if(err) {
-        console.log(err);
-    } else {
-        console.log(blog);
-    }
-});*/
 
 /********** Routing ***********/
 
@@ -56,14 +46,14 @@ app.get("/blogs/new", function(req, res) {
 
 //CREATE Route
 app.post("/blogs", function(req, res) {
-   var data = req.body.blog;
-   Blog.create(data, 
-    function(err, newBlog) {
-        if(err) {
-            res.render("new");
-        } else {
-            res.redirect("/blogs");
-        }
+    req.body.blog.body = req.sanitize(req.body.blog.body);
+    Blog.create(req.body.blog, 
+        function(err, newBlog) {
+            if(err) {
+                res.render("new");
+            } else {
+                res.redirect("/blogs");
+            }
     });
 
 });
