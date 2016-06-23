@@ -35,6 +35,7 @@ app.get("/", function(req, res) {
     res.redirect("/blogs");    
 });
 
+//INDEX Route
 app.get("/blogs", function(req, res) {
     Blog.find({}, function(err, blogs) {
        if(err) {
@@ -45,6 +46,51 @@ app.get("/blogs", function(req, res) {
     });
 });
 
+//NEW Route
+app.get("/blogs/new", function(req, res) {
+   res.render("new"); 
+});
+
+//CREATE Route
+app.post("/blogs", function(req, res) {
+   var data = req.body.blog;
+   Blog.create(data, 
+    function(err, newBlog) {
+        if(err) {
+            res.render("new");
+        } else {
+            res.redirect("/blogs");
+        }
+    });
+
+});
+
+//SHOW Route
+app.get("/blogs/:id", function(req, res){
+    Blog.findById(req.params.id, function(err, foundBlog){
+        if(err) {
+            res.redirect("/blogs");
+        } else {
+            res.render("show", {blog: foundBlog});
+        }
+    });
+});
+
+//EDIT Route
+app.get("/blogs/:id/edit", function(req, res) {
+    Blog.findById(req.params.id, function(err, foundBlog){
+        if(err) {
+            res.redirect("/blogs");
+        } else {
+            res.render("edit", {blog: foundBlog});
+        }
+    });
+});
+
+//UPDATE Route
+app.put("/blogs/:id", function(req, res){
+    
+});
 
 app.listen(process.env.PORT, process.env.IP, function() {
    console.log("Server is listening..."); 
